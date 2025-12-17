@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>אימון דרגות הרמוניות - מתקדם</title>
+    <style>
+        /* --- Design System based on File 1 --- */
+        :root {
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --accent: #f5576c;
+            --text: #2d3748;
+            --success: #48bb78;
+            --error: #f56565;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: var(--text);
+            overflow: hidden;
+        }
+
+        .container {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 900px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            position: relative;
+            min-height: 600px; /* Fixed height for stability */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* Screens */
+        .screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            color: var(--primary);
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        h2 {
+            color: var(--secondary);
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        /* Buttons */
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 10px;
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn.secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .btn.outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .btn.outline.selected {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Status Messages */
+        .status-message {
+            padding: 15px 25px;
+            margin: 20px 0;
+            border-radius: 10px;
+            font-size: 1.2em;
+            width: 100%;
+            max-width: 600px;
+        }
+        .status-info { background: #ebf8ff; color: #2b6cb0; }
+        .status-success { background: #f0fff4; color: #2f855a; }
+        .status-error { background: #fff5f5; color: #c53030; }
+
+        /* Piano Keyboard Visualization */
+        .piano-keyboard {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+            height: 150px;
+            position: relative;
+        }
+
+        .white-key {
+            width: 40px;
+            height: 150px;
+            background: white;
+            border: 2px solid #333;
+            border-radius: 0 0 5px 5px;
+            cursor: pointer;
+            position: relative;
+        }
+        .white-key.active { background: var(--primary) !important; border-color: var(--secondary); }
+
+        .black-key {
+            width: 28px;
+            height: 90px;
+            background: #333;
+            border: 2px solid #000;
+            border-radius: 0 0 3px 3px;
+            cursor: pointer;
+            position: absolute;
+            z-index: 2;
+        }
+        .black-key.active { background: var(--primary) !important; border-color: var(--secondary); }
+
+        /* Degree Grid */
+        .degree-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .degree-btn {
+            padding: 15px;
+            font-size: 1.2em;
+            border-radius: 10px;
+            background: white;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .degree-btn.selected {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Practice Area */
+        .chord-sequence {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin: 40px 0;
+        }
+
+        .chord-box {
+            width: 90px;
+            height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8em;
+            font-weight: bold;
+            border-radius: 15px;
+            background: white;
+            border: 3px solid #e2e8f0;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            color: #a0aec0;
+        }
+
+        .chord-box.current {
+            background: white;
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: scale(1.15);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .chord-box.completed {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+            transform: scale(1);
+        }
+        
+        .chord-box.playing {
+            /* For playback visualization */
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+            transform: scale(1.15);
+            box-shadow: 0 0 20px rgba(245, 87, 108, 0.5);
+        }
+
+        .chord-box.error {
+            border-color: var(--error);
+            background: #fff5f5;
+            color: var(--error);
+            animation: shake 0.4s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0) scale(1.15); }
+            25% { transform: translateX(-10px) scale(1.15); }
+            75% { transform: translateX(10px) scale(1.15); }
+        }
+
+        .info-hint {
+            color: #718096;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+        
+        .key-badge {
+            display: inline-block;
+            background: #2d3748;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin: 0 5px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <!-- Screen 1: Permissions -->
+        <div id="screen-permissions" class="screen active">
+            <h1>🎹 אימון דרגות הרמוניות</h1>
+            <div class="status-message status-info">
+                שלום! כדי להתחיל, האפליקציה זקוקה לגישה לפסנתר ה-MIDI שלך.
+            </div>
+            <button class="btn" id="btn-request-midi">אשר גישה ל-MIDI</button>
+            <div id="midi-check-msg" style="display:none; margin-top: 20px;">
+                <p>מצוין. כעת לחץ על <strong>תו כלשהו</strong> בפסנתר לאימות חיבור.</p>
+            </div>
+        </div>
+
+        <!-- Screen 2: Setup -->
+        <div id="screen-setup" class="screen">
+            <h1>הגדרות אימון</h1>
+            
+            <!-- Scale Type -->
+            <div>
+                <button class="btn outline selected" id="btn-mode-major">מז'ור</button>
+                <button class="btn outline" id="btn-mode-minor">מינור</button>
+            </div>
+
+            <!-- Root Note -->
+            <div style="margin-top: 20px;">
+                <p>בחר תו בסיס (בפסנתר או כאן): <strong id="root-display" style="color: var(--primary); font-size: 1.2em;">-</strong></p>
+                <div class="piano-keyboard" id="piano-container">
+                    <!-- JS generated keys -->
+                </div>
+            </div>
+
+            <!-- Degrees -->
+            <p>בחר דרגות לתרגול:</p>
+            <div class="degree-grid" id="degree-container">
+                <!-- JS generated degrees -->
+            </div>
+
+            <button class="btn" id="btn-start" disabled>התחל תרגול</button>
+        </div>
+
+        <!-- Screen 3: Practice & Playback -->
+        <div id="screen-practice" class="screen">
+            <h2 id="practice-title">...</h2>
+            
+            <div id="status-bar" class="status-message status-info">נגן את האקורד המודגש</div>
+            
+            <div class="chord-sequence" id="chord-display">
+                <!-- JS generated chords -->
+            </div>
+            
+            <div id="playback-controls" style="display: none; flex-direction: column; gap: 10px; margin-top: 20px;">
+                <p>האימון הסתיים!</p>
+                <div>
+                    <button class="btn" onclick="app.restartPractice()">אימון חדש <span class="key-badge">A</span></button>
+                    <button class="btn secondary" onclick="app.goToSetup()">הגדרות <span class="key-badge">C</span></button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        /**
+         * Unified Application Logic
+         * Combines visual elements of File 1 with robust state logic of File 2
+         */
+
+        const CONSTANTS = {
+            NOTE_NAMES: ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'],
+            NOTE_NAMES_HE: ['דו', 'דו#', 'רה', 'רה#', 'מי', 'פה', 'פה#', 'סול', 'סול#', 'לה', 'לה#', 'סי'],
+            ROMAN_MAJOR: ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii°'],
+            ROMAN_MINOR: ['i', 'ii°', 'III', 'iv', 'v', 'VI', 'VII'],
+            INTERVALS_MAJOR: [0, 2, 4, 5, 7, 9, 11],
+            INTERVALS_MINOR: [0, 2, 3, 5, 7, 8, 10]
+        };
+
+        const app = {
+            state: {
+                screen: 'permissions',
+                midiAccess: null,
+                midiOutput: null,
+                rootNote: null, // 0-11
+                scaleMode: 'major', // 'major' | 'minor'
+                selectedDegrees: [0, 3, 4], // Indexes 0-6
+                
+                // Practice Runtime
+                progression: [], // Array of degree indexes
+                currentIndex: 0,
+                activeNotes: new Set(), // Currently held notes (raw MIDI numbers)
+                previousChordNotes: new Set(), // Notes (0-11) allowed from previous chord
+                isRecording: false,
+                isPlayback: false,
+                recordingStart: 0,
+                recordedEvents: [], // {timestamp, data}
+                playbackTimeouts: []
+            },
+
+            init: function() {
+                this.bindEvents();
+                this.renderPiano();
+            },
+
+            bindEvents: function() {
+                document.getElementById('btn-request-midi').onclick = () => this.requestMIDI();
+                
+                document.getElementById('btn-mode-major').onclick = () => this.setMode('major');
+                document.getElementById('btn-mode-minor').onclick = () => this.setMode('minor');
+                
+                document.getElementById('btn-start').onclick = () => this.startPractice();
+            },
+
+            // --- MIDI Handling ---
+
+            requestMIDI: async function() {
+                try {
+                    this.state.midiAccess = await navigator.requestMIDIAccess();
+                    
+                    // Setup inputs
+                    for (const entry of this.state.midiAccess.inputs) {
+                        entry[1].onmidimessage = (msg) => this.handleMIDIMessage(msg);
+                    }
+                    
+                    // Setup output (take first available)
+                    if (this.state.midiAccess.outputs.size > 0) {
+                        this.state.midiOutput = this.state.midiAccess.outputs.values().next().value;
+                    }
+
+                    document.getElementById('btn-request-midi').style.display = 'none';
+                    document.getElementById('midi-check-msg').style.display = 'block';
+
+                } catch (err) {
+                    alert('שגיאה בגישה ל-MIDI: ' + err);
+                }
+            },
+
+            handleMIDIMessage: function(msg) {
+                const [status, data1, data2] = msg.data;
+                const command = status >> 4;
+                const note = data1;
+                const velocity = data2;
+                const isNoteOn = (command === 9 && velocity > 0);
+                const isNoteOff = (command === 8 || (command === 9 && velocity === 0));
+
+                // 1. Permissions Screen Logic
+                if (this.state.screen === 'permissions' && isNoteOn) {
+                    this.switchScreen('setup');
+                    this.updateDegreeUI();
+                    return;
+                }
+
+                // 2. Setup Screen Logic
+                if (this.state.screen === 'setup' && isNoteOn) {
+                    this.setRootNote(note % 12);
+                    return;
+                }
+
+                // 3. Practice Screen Logic
+                if (this.state.screen === 'practice') {
+                    // Recording
+                    if (this.state.isRecording) {
+                        this.state.recordedEvents.push({
+                            timestamp: performance.now() - this.state.recordingStart,
+                            data: [status, data1, data2]
+                        });
+                    }
+
+                    // Chord Recognition
+                    if (!this.state.isPlayback) {
+                        if (isNoteOn) {
+                            this.state.activeNotes.add(note);
+                            this.checkChordLogic(note);
+                        } else if (isNoteOff) {
+                            this.state.activeNotes.delete(note);
+                        }
+                    }
+
+                    // Menu Shortcuts (After playback)
+                    if (!this.state.isRecording && !this.state.isPlayback && isNoteOn) {
+                        const n = note % 12;
+                        if (n === 9) this.restartPractice(); // A
+                        if (n === 0) this.goToSetup(); // C
+                    }
+                }
+            },
+
+            // --- Core Logic (The "Smart" Part from File 2) ---
+
+            checkChordLogic: function(triggerNote) {
+                // Ignore if practice is over
+                if (this.state.currentIndex >= this.state.progression.length) return;
+
+                const degreeIdx = this.state.progression[this.state.currentIndex];
+                const targetNotes = this.getChordNotes(degreeIdx); // [n1, n2, n3] (0-11)
+                const triggerNoteNorm = triggerNote % 12;
+
+                // A. Mistake Check
+                // Is the new note NOT in target AND NOT in previous?
+                const isTarget = targetNotes.includes(triggerNoteNorm);
+                const isPrevious = this.state.previousChordNotes.has(triggerNoteNorm);
+
+                if (!isTarget && !isPrevious) {
+                    this.handleMistake();
+                    return;
+                }
+
+                // B. Completion Check
+                // Are ALL 3 target notes currently held?
+                const allHeld = targetNotes.every(target => {
+                    for (let active of this.state.activeNotes) {
+                        if (active % 12 === target) return true;
+                    }
+                    return false;
+                });
+
+                if (allHeld) {
+                    this.advanceChord(targetNotes);
+                }
+            },
+
+            getChordNotes: function(degreeIdx) {
+                const intervals = this.state.scaleMode === 'major' ? CONSTANTS.INTERVALS_MAJOR : CONSTANTS.INTERVALS_MINOR;
+                const root = this.state.rootNote;
+                
+                // Diatonic Triad Math: 1, 3, 5 relative to scale index
+                const i1 = degreeIdx;
+                const i3 = (degreeIdx + 2) % 7;
+                const i5 = (degreeIdx + 4) % 7;
+
+                return [
+                    (root + intervals[i1]) % 12,
+                    (root + intervals[i3]) % 12,
+                    (root + intervals[i5]) % 12
+                ];
+            },
+
+            handleMistake: function() {
+                // Visual Shake
+                const boxes = document.querySelectorAll('.chord-box');
+                if (boxes[this.state.currentIndex]) {
+                    boxes[this.state.currentIndex].classList.add('error');
+                }
+
+                const status = document.getElementById('status-bar');
+                status.textContent = 'טעות! מתחיל מחדש...';
+                status.className = 'status-message status-error';
+
+                // Restart logic delay
+                setTimeout(() => {
+                    this.startPractice(); // Regenerate and restart
+                }, 1000);
+            },
+
+            advanceChord: function(completedNotes) {
+                // Visual Update
+                const boxes = document.querySelectorAll('.chord-box');
+                boxes[this.state.currentIndex].classList.remove('current');
+                boxes[this.state.currentIndex].classList.add('completed');
+                boxes[this.state.currentIndex].classList.remove('error'); // Clear error if any
+
+                // Logic Update
+                this.state.previousChordNotes = new Set(completedNotes); // Allow these notes to linger (Legato)
+                this.state.currentIndex++;
+
+                if (this.state.currentIndex >= this.state.progression.length) {
+                    this.finishPractice();
+                } else {
+                    boxes[this.state.currentIndex].classList.add('current');
+                }
+            },
+
+            // --- Flow & Visuals ---
+
+            switchScreen: function(id) {
+                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+                document.getElementById('screen-' + id).classList.add('active');
+                this.state.screen = id;
+            },
+
+            renderPiano: function() {
+                const container = document.getElementById('piano-container');
+                container.innerHTML = '';
+                
+                const whiteNotes = [0, 2, 4, 5, 7, 9, 11];
+                const blackNotes = [1, 3, 6, 8, 10];
+                const blackPositions = [26, 68, 152, 194, 236]; // Pixels from left
+
+                // Render White
+                whiteNotes.forEach((note, i) => {
+                    const key = document.createElement('div');
+                    key.className = 'white-key';
+                    key.dataset.note = note;
+                    key.onclick = () => this.setRootNote(note);
+                    key.style.left = (i * 42) + 'px';
+                    container.appendChild(key);
+                });
+
+                // Render Black
+                blackNotes.forEach((note, i) => {
+                    const key = document.createElement('div');
+                    key.className = 'black-key';
+                    key.dataset.note = note;
+                    key.onclick = () => this.setRootNote(note);
+                    key.style.left = blackPositions[i] + 'px';
+                    container.appendChild(key);
+                });
+            },
+
+            setRootNote: function(note) {
+                this.state.rootNote = note;
+                
+                // Highlight Piano
+                document.querySelectorAll('.white-key, .black-key').forEach(k => k.classList.remove('active'));
+                const key = document.querySelector(`[data-note="${note}"]`);
+                if (key) key.classList.add('active');
+
+                // Update Text
+                document.getElementById('root-display').textContent = CONSTANTS.NOTE_NAMES_HE[note];
+                document.getElementById('btn-start').disabled = false;
+            },
+
+            setMode: function(mode) {
+                this.state.scaleMode = mode;
+                document.getElementById('btn-mode-major').classList.toggle('selected', mode === 'major');
+                document.getElementById('btn-mode-minor').classList.toggle('selected', mode === 'minor');
+                
+                // Reset selected degrees just in case or update labels
+                this.updateDegreeUI();
+            },
+
+            updateDegreeUI: function() {
+                const container = document.getElementById('degree-container');
+                container.innerHTML = '';
+                const labels = this.state.scaleMode === 'major' ? CONSTANTS.ROMAN_MAJOR : CONSTANTS.ROMAN_MINOR;
+
+                labels.forEach((label, i) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'degree-btn' + (this.state.selectedDegrees.includes(i) ? ' selected' : '');
+                    btn.textContent = label;
+                    btn.onclick = () => {
+                        const idx = this.state.selectedDegrees.indexOf(i);
+                        if (idx > -1) {
+                            if (this.state.selectedDegrees.length > 1) this.state.selectedDegrees.splice(idx, 1);
+                        } else {
+                            this.state.selectedDegrees.push(i);
+                        }
+                        this.updateDegreeUI();
+                    };
+                    container.appendChild(btn);
+                });
+            },
+
+            // --- Practice Session ---
+
+            startPractice: function() {
+                // Generate Progression
+                this.state.progression = [];
+                let last = -1;
+                for(let i=0; i<10; i++) {
+                    const pool = this.state.selectedDegrees.filter(d => d !== last);
+                    const next = pool.length > 0 ? pool[Math.floor(Math.random() * pool.length)] : this.state.selectedDegrees[0];
+                    this.state.progression.push(next);
+                    last = next;
+                }
+
+                // Reset Runtime State
+                this.state.currentIndex = 0;
+                this.state.activeNotes.clear();
+                this.state.previousChordNotes.clear();
+                this.state.recordedEvents = [];
+                this.state.isRecording = true;
+                this.state.isPlayback = false;
+                this.state.recordingStart = performance.now();
+                this.state.playbackTimeouts.forEach(clearTimeout);
+
+                // Render UI
+                const container = document.getElementById('chord-display');
+                container.innerHTML = '';
+                const labels = this.state.scaleMode === 'major' ? CONSTANTS.ROMAN_MAJOR : CONSTANTS.ROMAN_MINOR;
+                
+                this.state.progression.forEach((d, i) => {
+                    const box = document.createElement('div');
+                    box.className = 'chord-box' + (i === 0 ? ' current' : '');
+                    box.textContent = labels[d];
+                    container.appendChild(box);
+                });
+
+                document.getElementById('practice-title').textContent = 
+                    `${CONSTANTS.NOTE_NAMES_HE[this.state.rootNote]} ${this.state.scaleMode === 'major' ? 'מז\'ור' : 'מינור'}`;
+                
+                const status = document.getElementById('status-bar');
+                status.textContent = 'נגן את האקורד המודגש';
+                status.className = 'status-message status-info';
+                
+                document.getElementById('playback-controls').style.display = 'none';
+
+                this.switchScreen('practice');
+            },
+
+            finishPractice: function() {
+                this.state.isRecording = false;
+                
+                const status = document.getElementById('status-bar');
+                status.textContent = 'מצוין! ממתין 5 שניות להשמעה...';
+                status.className = 'status-message status-success';
+
+                setTimeout(() => {
+                    this.startPlayback();
+                }, 5000);
+            },
+
+            startPlayback: function() {
+                if (this.state.recordedEvents.length === 0 || !this.state.midiOutput) {
+                    this.finishPlayback();
+                    return;
+                }
+
+                this.state.isPlayback = true;
+                const status = document.getElementById('status-bar');
+                status.textContent = '▶ משמיע את הביצוע שלך...';
+                status.className = 'status-message status-info';
+
+                // Reset Visuals for playback sync
+                this.state.currentIndex = 0;
+                this.state.activeNotes.clear();
+                document.querySelectorAll('.chord-box').forEach((b, i) => {
+                    b.className = 'chord-box' + (i === 0 ? ' playing' : '');
+                });
+
+                // Schedule Events
+                this.state.recordedEvents.forEach(evt => {
+                    const t = setTimeout(() => {
+                        // 1. Send MIDI
+                        try { this.state.midiOutput.send(evt.data); } catch(e){}
+                        
+                        // 2. Sync Visuals (Simulate Logic)
+                        this.simulatePlaybackVisuals(evt.data);
+
+                    }, evt.timestamp);
+                    this.state.playbackTimeouts.push(t);
+                });
+
+                // End Event
+                const duration = this.state.recordedEvents[this.state.recordedEvents.length-1].timestamp;
+                const tEnd = setTimeout(() => this.finishPlayback(), duration + 1000);
+                this.state.playbackTimeouts.push(tEnd);
+            },
+
+            simulatePlaybackVisuals: function(data) {
+                const [status, data1, data2] = data;
+                const command = status >> 4;
+                const note = data1;
+                const velocity = data2;
+
+                if (command === 9 && velocity > 0) { // Note On
+                    this.state.activeNotes.add(note);
+                    
+                    // Logic check (Simplified version of checkChordLogic that never fails)
+                    if (this.state.currentIndex < this.state.progression.length) {
+                        const degreeIdx = this.state.progression[this.state.currentIndex];
+                        const targetNotes = this.getChordNotes(degreeIdx);
+                        
+                        const allHeld = targetNotes.every(target => {
+                            for (let active of this.state.activeNotes) {
+                                if (active % 12 === target) return true;
+                            }
+                            return false;
+                        });
+
+                        if (allHeld) {
+                            // Visual Update for Playback
+                            const boxes = document.querySelectorAll('.chord-box');
+                            boxes[this.state.currentIndex].classList.remove('playing');
+                            boxes[this.state.currentIndex].classList.add('completed');
+                            
+                            this.state.currentIndex++;
+                            if (this.state.currentIndex < this.state.progression.length) {
+                                boxes[this.state.currentIndex].classList.add('playing');
+                            }
+                        }
+                    }
+
+                } else if (command === 8 || (command === 9 && velocity === 0)) {
+                    this.state.activeNotes.delete(note);
+                }
+            },
+
+            finishPlayback: function() {
+                this.state.isPlayback = false;
+                
+                // Silence MIDI
+                if (this.state.midiOutput) {
+                    for(let i=0; i<128; i++) this.state.midiOutput.send([128, i, 0]);
+                    this.state.midiOutput.send([176, 64, 0]); // Pedal off
+                }
+
+                const status = document.getElementById('status-bar');
+                status.textContent = 'האימון הסתיים';
+                status.className = 'status-message status-success';
+                
+                document.getElementById('playback-controls').style.display = 'flex';
+            },
+
+            restartPractice: function() {
+                this.startPractice();
+            },
+
+            goToSetup: function() {
+                this.state.isRecording = false;
+                this.state.isPlayback = false;
+                this.state.playbackTimeouts.forEach(clearTimeout);
+                this.switchScreen('setup');
+            }
+        };
+
+        // Initialize App
+        app.init();
+
+    </script>
+</body>
+</html>
