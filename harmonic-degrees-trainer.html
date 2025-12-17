@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>תרגול דרגות הרמוניות</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 900px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 2.5em;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn.secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .status-message {
+            text-align: center;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            font-size: 1.2em;
+        }
+
+        .status-message.info {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .status-message.success {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+
+        .status-message.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .piano-keyboard {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+            height: 150px;
+            position: relative;
+        }
+
+        .white-key {
+            width: 40px;
+            height: 150px;
+            background: white;
+            border: 2px solid #333;
+            border-radius: 0 0 5px 5px;
+            cursor: pointer;
+            transition: background 0.1s;
+            position: relative;
+        }
+
+        .white-key:hover {
+            background: #f0f0f0;
+        }
+
+        .white-key.active {
+            background: #667eea !important;
+        }
+
+        .black-key {
+            width: 28px;
+            height: 90px;
+            background: #333;
+            border: 2px solid #000;
+            border-radius: 0 0 3px 3px;
+            cursor: pointer;
+            position: absolute;
+            z-index: 2;
+            transition: background 0.1s;
+        }
+
+        .black-key:hover {
+            background: #555;
+        }
+
+        .black-key.active {
+            background: #667eea !important;
+        }
+
+        .mode-selector {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .mode-btn {
+            padding: 20px 40px;
+            font-size: 1.3em;
+            border-radius: 15px;
+        }
+
+        .mode-btn.selected {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            box-shadow: 0 5px 15px rgba(240, 147, 251, 0.4);
+        }
+
+        .degree-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .degree-btn {
+            padding: 20px;
+            font-size: 1.3em;
+            border-radius: 10px;
+            background: white;
+            border: 2px solid #667eea;
+            color: #667eea;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .degree-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .degree-btn.selected {
+            background: #667eea;
+            color: white;
+        }
+
+        .chord-sequence {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .chord-box {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8em;
+            font-weight: bold;
+            border-radius: 10px;
+            background: white;
+            border: 3px solid #ddd;
+            transition: all 0.3s;
+        }
+
+        .chord-box.current {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: scale(1.2);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+        }
+
+        .chord-box.completed {
+            background: #4caf50;
+            color: white;
+            border-color: #4caf50;
+        }
+
+        .chord-box.playing {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            animation: pulse 0.5s ease infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .info-text {
+            text-align: center;
+            color: #666;
+            margin: 20px 0;
+            font-size: 1.1em;
+        }
+
+        .scale-display {
+            text-align: center;
+            font-size: 1.5em;
+            color: #667eea;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .error-shake {
+            animation: shake 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Page 1: MIDI Permission -->
+        <div id="page1" class="page active">
+            <h1>🎹 תרגול דרגות הרמוניות</h1>
+            <div class="status-message info" id="midiStatus">
+                הכן את הפסנתר שלך...
+            </div>
+            <div style="text-align: center;">
+                <button class="btn" id="connectMidiBtn">התחבר לפסנתר MIDI</button>
+            </div>
+        </div>
+
+        <!-- Page 2: Scale & Settings -->
+        <div id="page2" class="page">
+            <h1>בחירת סולם והגדרות</h1>
+            
+            <div class="mode-selector">
+                <button class="btn mode-btn" id="majorBtn">מז'ור</button>
+                <button class="btn mode-btn" id="minorBtn">מינור</button>
+            </div>
+
+            <div class="info-text">לחץ על תו הבסיס בפסנתר:</div>
+            
+            <div class="piano-keyboard" id="rootNotePiano"></div>
+
+            <div class="scale-display" id="scaleDisplay">בחר סולם</div>
+
+            <div class="info-text">בחר דרגות לתרגול:</div>
+            
+            <div class="degree-selector" id="degreeSelector"></div>
+
+            <div style="text-align: center;">
+                <button class="btn" id="startPracticeBtn" style="display: none;">התחל תרגול</button>
+            </div>
+        </div>
+
+        <!-- Page 3: Practice -->
+        <div id="page3" class="page">
+            <h1>תרגול</h1>
+            
+            <div class="scale-display" id="practiceScaleDisplay"></div>
+
+            <div class="chord-sequence" id="chordSequence"></div>
+
+            <div class="status-message info" id="practiceStatus">
+                נגן את האקורד המודגש
+            </div>
+
+            <div class="controls" id="practiceControls" style="display: none;">
+                <button class="btn" id="newSequenceBtn">מהלך חדש (A)</button>
+                <button class="btn secondary" id="backToSettingsBtn">חזרה להגדרות (C)</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // MIDI State
+        let midiAccess = null;
+        let midiInput = null;
+        let midiOutput = null;
+
+        // Music Theory
+        const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+        const noteNamesHebrew = ['דו', 'דו#', 'רה', 'רה#', 'מי', 'פה', 'פה#', 'סול', 'סול#', 'לה', 'לה#', 'סי'];
+        
+        const majorIntervals = [0, 2, 4, 5, 7, 9, 11];
+        const minorIntervals = [0, 2, 3, 5, 7, 8, 10];
+        
+        const majorChordTypes = ['', 'm', 'm', '', '', 'm', 'dim'];
+        const minorChordTypes = ['m', 'dim', '', 'm', 'm', '', ''];
+        
+        const romanNumeralsMajor = ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii°'];
+        const romanNumeralsMinor = ['i', 'ii°', 'III', 'iv', 'v', 'VI', 'VII'];
+
+        // App State
+        let currentPage = 1;
+        let scaleMode = null; // 'major' or 'minor'
+        let rootNote = null; // 0-11 (C-B)
+        let selectedDegrees = [];
+        let currentSequence = [];
+        let currentChordIndex = 0;
+        let currentChordNotes = new Set();
+        let recordedEvents = [];
+        let isRecording = false;
+        let isPlayingBack = false;
+        let recordingStartTime = 0;
+
+        // Helper Functions
+        function getScaleNotes(root, mode) {
+            const intervals = mode === 'major' ? majorIntervals : minorIntervals;
+            return intervals.map(i => (root + i) % 12);
+        }
+
+        function getChordNotes(degree, root, mode) {
+            const scaleNotes = getScaleNotes(root, mode);
+            const rootIdx = degree - 1;
+            const third = scaleNotes[(rootIdx + 2) % 7];
+            const fifth = scaleNotes[(rootIdx + 4) % 7];
+            return [scaleNotes[rootIdx], third, fifth];
+        }
+
+        function getRomanNumeral(degree, mode) {
+            return mode === 'major' ? romanNumeralsMajor[degree - 1] : romanNumeralsMinor[degree - 1];
+        }
+
+        function normalizeNote(note) {
+            return note % 12;
+        }
+
+        // Page Navigation
+        function showPage(pageNum) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(`page${pageNum}`).classList.add('active');
+            currentPage = pageNum;
+        }
+
+        // MIDI Functions
+        async function connectMIDI() {
+            const statusEl = document.getElementById('midiStatus');
+            statusEl.textContent = 'מתחבר...';
+            statusEl.className = 'status-message info';
+
+            try {
+                midiAccess = await navigator.requestMIDIAccess({ sysex: false });
+                
+                const inputs = Array.from(midiAccess.inputs.values());
+                const outputs = Array.from(midiAccess.outputs.values());
+                
+                if (inputs.length === 0) {
+                    statusEl.textContent = 'לא נמצא פסנתר MIDI. אנא חבר פסנתר ונסה שוב.';
+                    statusEl.className = 'status-message error';
+                    return;
+                }
+
+                midiInput = inputs[0];
+                midiOutput = outputs[0] || null;
+                
+                statusEl.textContent = 'נא לחץ על תו כלשהו בפסנתר לאימות החיבור...';
+                statusEl.className = 'status-message info';
+
+                midiInput.onmidimessage = (event) => {
+                    const [command, note, velocity] = event.data;
+                    if (command === 144 && velocity > 0) { // Note On
+                        statusEl.textContent = '✓ החיבור הצליח!';
+                        statusEl.className = 'status-message success';
+                        
+                        setTimeout(() => {
+                            setupPage2();
+                            showPage(2);
+                        }, 1500);
+                        
+                        midiInput.onmidimessage = null;
+                    }
+                };
+            } catch (error) {
+                statusEl.textContent = 'שגיאה בחיבור ל-MIDI: ' + error.message;
+                statusEl.className = 'status-message error';
+            }
+        }
+
+        // Page 2: Setup
+        function setupPage2() {
+            const majorBtn = document.getElementById('majorBtn');
+            const minorBtn = document.getElementById('minorBtn');
+            
+            majorBtn.onclick = () => {
+                scaleMode = 'major';
+                majorBtn.classList.add('selected');
+                minorBtn.classList.remove('selected');
+                updateScaleDisplay();
+                updateDegreeSelector();
+            };
+            
+            minorBtn.onclick = () => {
+                scaleMode = 'minor';
+                minorBtn.classList.add('selected');
+                majorBtn.classList.remove('selected');
+                updateScaleDisplay();
+                updateDegreeSelector();
+            };
+
+            // Create piano keyboard
+            createPianoKeyboard();
+
+            // Listen for MIDI input on root note selection
+            midiInput.onmidimessage = (event) => {
+                const [command, note] = event.data;
+                if (command === 144 && currentPage === 2) {
+                    rootNote = normalizeNote(note);
+                    highlightPianoKey(rootNote);
+                    updateScaleDisplay();
+                    updateDegreeSelector();
+                }
+            };
+
+            document.getElementById('startPracticeBtn').onclick = () => {
+                if (selectedDegrees.length > 0) {
+                    startPractice();
+                }
+            };
+        }
+
+        function createPianoKeyboard() {
+            const piano = document.getElementById('rootNotePiano');
+            piano.innerHTML = '';
+            
+            const whiteNotes = [0, 2, 4, 5, 7, 9, 11]; // C D E F G A B
+            const blackNotes = [1, 3, 6, 8, 10]; // C# D# F# G# A#
+            
+            whiteNotes.forEach((note, idx) => {
+                const key = document.createElement('div');
+                key.className = 'white-key';
+                key.dataset.note = note;
+                key.style.left = (idx * 42) + 'px';
+                key.onclick = () => {
+                    rootNote = note;
+                    highlightPianoKey(note);
+                    updateScaleDisplay();
+                    updateDegreeSelector();
+                };
+                piano.appendChild(key);
+            });
+            
+            const blackPositions = [26, 68, 152, 194, 236];
+            blackNotes.forEach((note, idx) => {
+                const key = document.createElement('div');
+                key.className = 'black-key';
+                key.dataset.note = note;
+                key.style.left = blackPositions[idx] + 'px';
+                key.onclick = () => {
+                    rootNote = note;
+                    highlightPianoKey(note);
+                    updateScaleDisplay();
+                    updateDegreeSelector();
+                };
+                piano.appendChild(key);
+            });
+        }
+
+        function highlightPianoKey(note) {
+            document.querySelectorAll('.white-key, .black-key').forEach(k => k.classList.remove('active'));
+            const key = document.querySelector(`[data-note="${note}"]`);
+            if (key) key.classList.add('active');
+        }
+
+        function updateScaleDisplay() {
+            const display = document.getElementById('scaleDisplay');
+            if (rootNote !== null && scaleMode) {
+                display.textContent = `${noteNamesHebrew[rootNote]} ${scaleMode === 'major' ? 'מז\'ור' : 'מינור'}`;
+            }
+        }
+
+        function updateDegreeSelector() {
+            const container = document.getElementById('degreeSelector');
+            container.innerHTML = '';
+            
+            if (!scaleMode) return;
+            
+            const numerals = scaleMode === 'major' ? romanNumeralsMajor : romanNumeralsMinor;
+            
+            numerals.forEach((numeral, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'degree-btn';
+                btn.textContent = numeral;
+                btn.onclick = () => {
+                    const degree = idx + 1;
+                    if (selectedDegrees.includes(degree)) {
+                        selectedDegrees = selectedDegrees.filter(d => d !== degree);
+                        btn.classList.remove('selected');
+                    } else {
+                        selectedDegrees.push(degree);
+                        btn.classList.add('selected');
+                    }
+                    
+                    document.getElementById('startPracticeBtn').style.display = 
+                        selectedDegrees.length > 0 ? 'inline-block' : 'none';
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        // Page 3: Practice
+        function startPractice() {
+            generateSequence();
+            displaySequence();
+            document.getElementById('practiceScaleDisplay').textContent = 
+                `${noteNamesHebrew[rootNote]} ${scaleMode === 'major' ? 'מז\'ור' : 'מינור'}`;
+            showPage(3);
+            
+            currentChordIndex = 0;
+            currentChordNotes.clear();
+            recordedEvents = [];
+            isRecording = true;
+            recordingStartTime = performance.now();
+            
+            setupPracticeMIDI();
+        }
+
+        function generateSequence() {
+            currentSequence = [];
+            let lastDegree = null;
+            
+            for (let i = 0; i < 10; i++) {
+                let degree;
+                do {
+                    degree = selectedDegrees[Math.floor(Math.random() * selectedDegrees.length)];
+                } while (degree === lastDegree && selectedDegrees.length > 1);
+                
+                currentSequence.push(degree);
+                lastDegree = degree;
+            }
+        }
+
+        function displaySequence() {
+            const container = document.getElementById('chordSequence');
+            container.innerHTML = '';
+            
+            currentSequence.forEach((degree, idx) => {
+                const box = document.createElement('div');
+                box.className = 'chord-box';
+                if (idx === 0) box.classList.add('current');
+                box.textContent = getRomanNumeral(degree, scaleMode);
+                box.dataset.index = idx;
+                container.appendChild(box);
+            });
+        }
+
+        function setupPracticeMIDI() {
+            const sustainPedal = new Set();
+            
+            midiInput.onmidimessage = (event) => {
+                const [command, note, velocity] = event.data;
+                const timestamp = performance.now() - recordingStartTime;
+                
+                // Recording function
+                if (isRecording) {
+                    recordedEvents.push({
+                        command,
+                        note,
+                        velocity,
+                        timestamp
+                    });
+                }
+                
+                // Chord recognition function
+                if (!isPlayingBack) {
+                    if (command === 144 && velocity > 0) { // Note On
+                        handleNoteOn(note);
+                    } else if (command === 176 && note === 64) { // Sustain pedal
+                        // Record but don't use for recognition
+                    }
+                    
+                    // Handle keyboard shortcuts during playback end
+                    if (document.getElementById('practiceControls').style.display === 'flex') {
+                        const normalizedNote = normalizeNote(note);
+                        if (command === 144 && velocity > 0) {
+                            if (normalizedNote === 9) { // A
+                                startNewSequence();
+                            } else if (normalizedNote === 0) { // C
+                                backToSettings();
+                            }
+                        }
+                    }
+                }
+            };
+        }
+
+        function handleNoteOn(midiNote) {
+            const note = normalizeNote(midiNote);
+            const currentDegree = currentSequence[currentChordIndex];
+            const expectedChord = getChordNotes(currentDegree, rootNote, scaleMode);
+            
+            // Check if note belongs to current chord
+            if (expectedChord.includes(note)) {
+                currentChordNotes.add(note);
+                
+                // Check if all three notes have been played
+                if (currentChordNotes.size === 3) {
+                    markChordComplete();
+                    currentChordIndex++;
+                    currentChordNotes.clear();
+                    
+                    if (currentChordIndex < currentSequence.length) {
+                        highlightCurrentChord();
+                    } else {
+                        finishPractice();
+                    }
+                }
+            } else {
+                // Check if it's from previous chord
+                if (currentChordIndex > 0) {
+                    const prevDegree = currentSequence[currentChordIndex - 1];
+                    const prevChord = getChordNotes(prevDegree, rootNote, scaleMode);
+                    if (prevChord.includes(note)) {
+                        return; // Ignore notes from previous chord
+                    }
+                }
+                
+                // It's an error
+                showError();
+            }
+        }
+
+        function markChordComplete() {
+            const boxes = document.querySelectorAll('.chord-box');
+            boxes[currentChordIndex].classList.remove('current');
+            boxes[currentChordIndex].classList.add('completed');
+        }
+
+        function highlightCurrentChord() {
+            const boxes = document.querySelectorAll('.chord-box');
+            boxes[currentChordIndex].classList.add('current');
+        }
+
+        function showError() {
+            const container = document.getElementById('chordSequence');
+            container.classList.add('error-shake');
+            
+            const statusEl = document.getElementById('practiceStatus');
+            statusEl.textContent = '❌ טעות! מתחיל מחדש...';
+            statusEl.className = 'status-message error';
+            
+            setTimeout(() => {
+                container.classList.remove('error-shake');
+                generateSequence();
+                displaySequence();
+                currentChordIndex = 0;
+                currentChordNotes.clear();
+                recordedEvents = [];
+                recordingStartTime = performance.now();
+                statusEl.textContent = 'נגן את האקורד המודגש';
+                statusEl.className = 'status-message info';
+            }, 1500);
+        }
+
+        function finishPractice() {
+            const statusEl = document.getElementById('practiceStatus');
+            statusEl.textContent = '✓ מצוין! ממתין 5 שניות...';
+            statusEl.className = 'status-message success';
+            
+            setTimeout(() => {
+                isRecording = false;
+                playbackRecording();
+            }, 5000);
+        }
+
+        async function playbackRecording() {
+            if (!midiOutput || recordedEvents.length === 0) {
+                showPlaybackControls();
+                return;
+            }
+            
+            isPlayingBack = true;
+            const statusEl = document.getElementById('practiceStatus');
+            statusEl.textContent = '▶ משמיע הקלטה...';
+            statusEl.className = 'status-message info';
+            
+            // Reset display
+            document.querySelectorAll('.chord-box').forEach((box, idx) => {
+                box.classList.remove('current', 'completed', 'playing');
+            });
+            
+            let chordIdx = 0;
+            const chordNotes = new Set();
+            
+            for (let i = 0; i < recordedEvents.length; i++) {
+                const event = recordedEvents[i];
+                const nextEvent = recordedEvents[i + 1];
+                
+                // Send MIDI message
+                midiOutput.send([event.command, event.note, event.velocity]);
+                
+                // Track chord progress
+                if (event.command === 144 && event.velocity > 0) {
+                    const note = normalizeNote(event.note);
+                    const currentDegree = currentSequence[chordIdx];
+                    const expectedChord = getChordNotes(currentDegree, rootNote, scaleMode);
+                    
+                    if (expectedChord.includes(note)) {
+                        chordNotes.add(note);
+                        
+                        // Highlight current chord during playback
+                        const boxes = document.querySelectorAll('.chord-box');
+                        boxes[chordIdx].classList.add('playing');
+                        
+                        if (chordNotes.size === 3) {
+                            boxes[chordIdx].classList.remove('playing');
+                            boxes[chordIdx].classList.add('completed');
+                            chordIdx++;
+                            chordNotes.clear();
+                            
+                            if (chordIdx < currentSequence.length) {
+                                boxes[chordIdx].classList.add('playing');
+                            }
+                        }
+                    }
+                }
+                
+                // Wait for next event
+                if (nextEvent) {
+                    const delay = nextEvent.timestamp - event.timestamp;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+            }
+            
+            isPlayingBack = false;
+            showPlaybackControls();
+        }
+
+        function showPlaybackControls() {
+            const statusEl = document.getElementById('practiceStatus');
+            statusEl.textContent = 'סיימת! בחר פעולה:';
+            statusEl.className = 'status-message success';
+            document.getElementById('practiceControls').style.display = 'flex';
+        }
+
+        function startNewSequence() {
+            document.getElementById('practiceControls').style.display = 'none';
+            startPractice();
+        }
+
+        function backToSettings() {
+            selectedDegrees = [];
+            showPage(2);
+            updateDegreeSelector();
+        }
+
+        // Initialize
+        document.getElementById('connectMidiBtn').onclick = connectMIDI;
+    </script>
+</body>
+</html>
